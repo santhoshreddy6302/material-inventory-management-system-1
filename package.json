@@ -9,7 +9,7 @@
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "seed": "cd backend && npm run seed",
     "build:frontend": "cd frontend && npm run build",
-    "build": "cd backend && npm install && npx prisma generate && npm run build",
+    "build": "cd backend && npm install --production=false && npx prisma generate && npm run build",
     "start": "cd backend && npx prisma db push --accept-data-loss && node dist/prisma/seed.js && node dist/server.js"
   },
   "devDependencies": {
