@@ -25,7 +25,7 @@ A comprehensive, enterprise-level full-stack web application designed for constr
 **Backend**
 - **Node.js** + **Express.js** + **TypeScript**
 - **Prisma ORM**
-- **Database**: Database-Agnostic (Currently configured for SQLite locally, deployable to Neon PostgreSQL)
+- **Database**: TiDB Cloud (MySQL-compatible) via Prisma ORM
 - **JWT** (Authentication)
 - **PDFKit** & **ExcelJS** (Reporting)
 
@@ -45,18 +45,27 @@ docker-compose up --build
 
 ---
 
-## 💻 Manual Local Development (SQLite)
+## 💻 Manual Local Development (TiDB Cloud)
 
-We are currently configured to use **SQLite** so that the application runs locally without any database installation required.
+The backend uses TiDB Cloud through Prisma's MySQL connector.
 
 1. **Setup & Seed Backend**
    ```bash
    cd backend
    npm install
+   copy .env.example .env
+   # Paste the Prisma connection string from TiDB Cloud into DATABASE_URL
    npx prisma generate
-   npm run seed  # Automatically generates the local SQLite DB and populates it with test data
+   npm run db:check
+   npm run db:push
+   npm run seed
    npm run dev
    ```
+
+   In TiDB Cloud, open the cluster, choose **Connect > Prisma**, and copy its
+   connection string. TiDB Cloud Starter public endpoints require
+   `sslaccept=strict`. `npm run db:push` creates the tables. The seed command
+   deletes existing rows first, so only run it when demo data is wanted.
 
 2. **Setup Frontend**
    ```bash
@@ -79,13 +88,11 @@ Use the following credentials to access the seeded database:
 
 The codebase is fully equipped with CI/CD pipelines (`.github/workflows/ci.yml`) and configuration files (`vercel.json`, `render.yaml`) to automatically deploy to Vercel (Frontend) and Render (Backend).
 
-### Switching to PostgreSQL for Production
-Before deploying to production, you must switch the ORM provider from SQLite to PostgreSQL:
-1. Open `backend/prisma/schema.prisma`.
-2. Change `provider = "sqlite"` to `provider = "postgresql"`.
-3. Change the `url` from `env("SQLITE_URL")` to `env("DATABASE_URL")`.
-4. Run `npx prisma generate` to rebuild the client.
-5. In your production environment (Render), provide the `DATABASE_URL` pointing to your Neon PostgreSQL instance.
+### TiDB Cloud in Production
+
+Set `DATABASE_URL` in the backend hosting environment to the same TiDB Cloud
+Prisma connection string. Keep the password out of source control; `.env` is
+already ignored by Git.
 
 ---
 

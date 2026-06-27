@@ -19,9 +19,6 @@ RUN npx prisma generate
 # Build TypeScript code
 RUN npm run build
 
-# Push database schema and seed data into SQLite dev.db
-RUN npx prisma db push --accept-data-loss && node dist/prisma/seed.js
-
 # Production stage
 FROM node:20-slim
 
@@ -42,5 +39,5 @@ COPY --from=builder /app/prisma ./prisma
 # Expose port
 EXPOSE 5000
 
-# Start command
-CMD ["node", "dist/server.js"]
+# Start command (Runs migrations, seeds the database, and starts the server)
+CMD npx prisma db push --accept-data-loss && node dist/prisma/seed.js && node dist/server.js

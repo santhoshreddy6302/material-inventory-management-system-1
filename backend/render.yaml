@@ -15,7 +15,7 @@ services:
       - key: FRONTEND_URL
         value: https://your-frontend-domain.vercel.app # TODO: Update after Vercel deployment
       - key: DATABASE_URL
-        sync: false # Requires manual entry in Render Dashboard (Neon PostgreSQL connection string)
+        sync: false # Paste the TiDB Cloud Prisma connection string
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
