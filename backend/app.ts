@@ -41,7 +41,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(compression());
 
 // CORS Configuration (Connects Frontend with Backend)
-const allowedOrigins = [
+const allowedOrigins = ([
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
@@ -49,11 +49,20 @@ const allowedOrigins = [
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
   process.env.FRONTEND_URL
-].filter(Boolean) as string[];
+].filter(Boolean) as string[]).map(url => url.replace(/\/$/, ''));
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    const normOrigin = origin.replace(/\/$/, '');
+    if (
+      allowedOrigins.includes(normOrigin) ||
+      normOrigin.endsWith('.vercel.app') ||
+      normOrigin.includes('santhoshreddy6302')
+    ) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
