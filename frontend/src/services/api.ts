@@ -1,8 +1,16 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
+// Ensure the base URL always ends with /api so that routes like
+// /auth/login always resolve to /api/auth/login regardless of
+// how VITE_API_URL is configured in Vercel or other platforms.
+const rawBase: string = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+const baseURL = rawBase.replace(/\/+$/, '').endsWith('/api')
+  ? rawBase.replace(/\/+$/, '')
+  : rawBase.replace(/\/+$/, '') + '/api';
+
 const api = axios.create({
-  baseURL: (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
 });

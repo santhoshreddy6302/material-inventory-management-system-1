@@ -58,8 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true;
       }
       return false;
-    } catch (e) {
-      toast.error('Network Error. Using Demo Mode is recommended if backend is down.');
+    } catch (e: any) {
+      const msg = e?.message || e?.response?.data?.message || 'Login failed. Please check your connection.';
+      toast.error(msg);
       return false;
     }
   };
