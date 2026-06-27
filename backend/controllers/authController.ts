@@ -39,14 +39,15 @@ export const login = async (req: Request, res: Response) => {
     });
 
     // Sign Access & Refresh Tokens
-    const accessToken = jwt.sign(      { id: user.id, role: user.role },
-      process.env.JWT_SECRET as string,
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as jwt.SignOptions
     );
 
     const refreshToken = jwt.sign(
       { id: user.id },
-      process.env.JWT_REFRESH_SECRET as string,
+      JWT_REFRESH_SECRET,
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' } as jwt.SignOptions
     );const { password: _, ...userData } = user;
     
@@ -116,14 +117,15 @@ export const refreshToken = async (req: Request, res: Response) => {
       return error(res, 'User not found or account deactivated', 401);
     }
 
-    const newAccessToken = jwt.sign(      { id: decoded.id, role: user.role },
-      process.env.JWT_SECRET as string,
+    const newAccessToken = jwt.sign(
+      { id: decoded.id, role: user.role },
+      JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as jwt.SignOptions
     );
 
     const newRefreshToken = jwt.sign(
       { id: user.id },
-      process.env.JWT_REFRESH_SECRET as string,
+      JWT_REFRESH_SECRET,
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' } as jwt.SignOptions
     );return success(res, {
       token: newAccessToken,

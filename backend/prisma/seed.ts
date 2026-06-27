@@ -6,35 +6,20 @@ const prisma = new PrismaClient();
 const ADMIN_PASSWORD_HASH = '$2a$12$GksDrLFq10IjVuue2TTtoetpcHBlzmzTx6w6Qfv/HcMaiC3mTgWn6';
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  const shouldSeed = process.env.SEED_DB === 'true' || process.env.NODE_ENV !== 'production';
+  const existingUsers = await prisma.user.count();
 
-  // 1. Clean existing records (Optional, if starting fresh)
-  // Clean in correct order of dependency
-  await prisma.activityLog.deleteMany({});
-  await prisma.alert.deleteMany({});
-  await prisma.labourWage.deleteMany({});
-  await prisma.labourAttendance.deleteMany({});
-  await prisma.projectExpense.deleteMany({});
-  await prisma.clientEnquiry.deleteMany({});
-  await prisma.paymentMilestone.deleteMany({});
-  await prisma.subcontractorTask.deleteMany({});
-  await prisma.equipmentMachinery.deleteMany({});
-  await prisma.siteProgress.deleteMany({});
-  await prisma.stockTransfer.deleteMany({});
-  await prisma.wastageRecord.deleteMany({});
-  await prisma.materialUsage.deleteMany({});
-  await prisma.inventoryTransaction.deleteMany({});
-  await prisma.inventory.deleteMany({});
-  await prisma.purchaseOrderItem.deleteMany({});
-  await prisma.purchaseOrder.deleteMany({});
-  await prisma.material.deleteMany({});
-  await prisma.supplier.deleteMany({});
-  await prisma.materialCategory.deleteMany({});
-  await prisma.site.deleteMany({});
-  await prisma.project.deleteMany({});
-  await prisma.user.deleteMany({});
+  if (!shouldSeed) {
+    console.log('ℹ️ Database seeding disabled for production. Set SEED_DB=true to initialize demo data.');
+    return;
+  }
 
-  console.log('🧹 Cleaned existing database tables');
+  if (existingUsers > 0) {
+    console.log('ℹ️ Existing data detected. Skipping seed to preserve MySQL data.');
+    return;
+  }
+
+  console.log('🌱 Seeding database with initial MySQL demo data...');
 
   // 2. Create Users
   const admin = await prisma.user.create({

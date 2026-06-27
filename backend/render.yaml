@@ -6,7 +6,7 @@ services:
     region: ohio
     rootDir: backend
     buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: node dist/server.js
+    startCommand: npx prisma db push --accept-data-loss && node dist/prisma/seed.js && node dist/server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,6 +16,8 @@ services:
         value: https://your-frontend-domain.vercel.app # TODO: Update after Vercel deployment
       - key: DATABASE_URL
         sync: false # Paste the TiDB Cloud Prisma connection string
+      - key: SEED_DB
+        value: true
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET

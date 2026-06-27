@@ -12,6 +12,8 @@
     "db:check": "ts-node scripts/checkDatabase.ts",
     "db:create": "ts-node scripts/createDatabase.ts",
     "db:push": "prisma db push",
+    "db:deploy": "prisma migrate deploy",
+    "db:setup": "prisma generate && prisma db push --accept-data-loss",
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
