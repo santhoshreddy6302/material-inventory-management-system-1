@@ -1,7 +1,10 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
+
+# Install openssl needed for Prisma
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY package*.json ./
@@ -20,12 +23,12 @@ RUN npm run build
 RUN npx prisma db push --accept-data-loss && node dist/prisma/seed.js
 
 # Production stage
-FROM node:20-alpine
-
-# Install OpenSSL 1.1 compatibility library for Prisma
-RUN apk add --no-cache compat-openssl11
+FROM node:20-slim
 
 WORKDIR /app
+
+# Install openssl needed for Prisma runtime
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy package files and install only production dependencies
 COPY package*.json ./
