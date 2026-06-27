@@ -10,7 +10,10 @@ export const getAll = async (req: Request, res: Response) => {
     const rows = await (prisma as any).projectExpense.findMany({
       skip: offset,
       take: limit,
-      orderBy: { id: 'desc' }
+      orderBy: { id: 'desc' },
+      include: {
+        project: { select: { name: true } }
+      }
     });
     return paginated(res, rows, total, page, limit);
   } catch (err: any) {

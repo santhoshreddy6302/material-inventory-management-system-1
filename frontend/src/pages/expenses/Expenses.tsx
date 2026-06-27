@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, DollarSign, Edit2, Trash2, RefreshCw } from 'lucide-react';
 import { expenseService } from '../../services/expenseService';
+import { projectService } from '../../services/projectService';
 import Pagination from '../../components/common/Pagination';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -14,16 +15,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
 import { Input } from '../../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Button } from '../../components/ui/button';
 
 interface Expense {
   id: string;
+  category: string;
   description: string;
   amount: string | number;
   expense_date: string;
+  project_id: number;
+  project?: { name: string };
 }
 
 const expenseSchema = z.object({
+  project_id: z.string().min(1, 'Project is required'),
+  category: z.string().min(1, 'Category is required'),
   description: z.string().min(1, 'Description is required'),
   amount: z.union([z.string(), z.number()]).refine(val => val !== '', { message: 'Amount is required' }),
   date: z.string().min(1, 'Date is required'),
@@ -36,6 +43,7 @@ export default function Expenses() {
   const canEdit = hasRole('admin', 'project_manager');
   
   const [data, setData] = useState<Expense[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -47,13 +55,18 @@ export default function Expenses() {
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
+      project_id: '',
+      category: 'Miscellaneous',
       description: '',
       amount: '',
       date: new Date().toISOString().split('T')[0],
     }
   });
 
-  useEffect(() => { fetchData(); }, [page]);
+  useEffect(() => {
+    fetchData();
+    projectService.getAll({ limit: 100 }).then(r => { if(r.data?.success) setProjects(r.data.data || []); }).catch(console.error);
+  }, [page]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -69,13 +82,15 @@ export default function Expenses() {
 
   const openAdd = () => { 
     setEditing(null); 
-    form.reset({ description: '', amount: '', date: new Date().toISOString().split('T')[0] }); 
+    form.reset({ project_id: '', category: 'Miscellaneous', description: '', amount: '', date: new Date().toISOString().split('T')[0] }); 
     setModal(true); 
   };
   
   const openEdit = (item: Expense) => { 
     setEditing(item); 
     form.reset({ 
+      project_id: String(item.project_id),
+      category: item.category,
       description: item.description, 
       amount: item.amount, 
       date: item.expense_date?.split('T')[0] || new Date().toISOString().split('T')[0] 
@@ -86,7 +101,12 @@ export default function Expenses() {
   const onSubmit = async (values: ExpenseFormValues) => {
     setSaving(true);
     try {
-      const payload = { ...values, amount: Number(values.amount), expense_date: values.date };
+      const payload = { 
+        ...values, 
+        project_id: parseInt(values.project_id),
+        amount: Number(values.amount), 
+        expense_date: values.date 
+      };
       const { data: r } = editing 
         ? await expenseService.update(editing.id, payload) 
         : await expenseService.create(payload);
@@ -140,6 +160,8 @@ export default function Expenses() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
+                <TableHead>Project</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Date</TableHead>
@@ -149,20 +171,22 @@ export default function Expenses() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={canEdit ? 4 : 3} className="h-32 text-center">
+                  <TableCell colSpan={canEdit ? 6 : 5} className="h-32 text-center">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
                   </TableCell>
                 </TableRow>
               ) : data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={canEdit ? 4 : 3} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={canEdit ? 6 : 5} className="h-32 text-center text-muted-foreground">
                     No expense records found.
                   </TableCell>
                 </TableRow>
               ) : (
                 data.map((item) => (
                   <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
-                    <TableCell className="font-medium text-foreground">{item.description}</TableCell>
+                    <TableCell className="font-semibold text-foreground">{item.project?.name || '—'}</TableCell>
+                    <TableCell>{item.category}</TableCell>
+                    <TableCell className="text-muted-foreground">{item.description}</TableCell>
                     <TableCell>₹{Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell>{item.expense_date ? new Date(item.expense_date).toLocaleDateString() : '—'}</TableCell>
                     {canEdit && (
@@ -198,9 +222,37 @@ export default function Expenses() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField control={form.control} name="project_id" render={({ field }) => (
+                <FormItem>
+                   <FormLabel>Project *</FormLabel>
+                   <Select onValueChange={field.onChange} value={field.value}>
+                     <FormControl><SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger></FormControl>
+                     <SelectContent>
+                       {(projects || []).map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
+                     </SelectContent>
+                   </Select>
+                   <FormMessage />
+                </FormItem>
+              )} />
+
+              <FormField control={form.control} name="category" render={({ field }) => (
+                <FormItem>
+                   <FormLabel>Category *</FormLabel>
+                   <Select onValueChange={field.onChange} value={field.value}>
+                     <FormControl><SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger></FormControl>
+                     <SelectContent>
+                       {['Materials', 'Equipment Maintenance', 'Labour / Wages', 'Transportation', 'Office Supplies', 'Miscellaneous'].map(c => (
+                         <SelectItem key={c} value={c}>{c}</SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                   <FormMessage />
+                </FormItem>
+              )} />
+
               <FormField control={form.control} name="description" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description *</FormLabel>
                   <FormControl><Input {...field} className="bg-background/50" /></FormControl>
                   <FormMessage />
                 </FormItem>
