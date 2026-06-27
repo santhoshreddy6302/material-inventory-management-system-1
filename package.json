@@ -1,0 +1,19 @@
+{
+  "name": "material-inventory-management-system",
+  "version": "1.0.0",
+  "description": "Material Inventory Management System for Construction Companies",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && npm run seed",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  },
+  "author": "AVINASH KANAPARTHI INFRA PRIVATE LIMITED",
+  "license": "MIT"
+}

@@ -1,0 +1,579 @@
+datasource db {
+  provider = "sqlite"
+  url = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String    
+  email      String    @unique 
+  password   String    
+  role String      @default("site_engineer")
+  phone      String?   
+  avatar     String?   
+  isActive   Boolean   @default(true) @map("is_active")
+  lastLogin  DateTime? @map("last_login")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  projectsManaged       Project[]              @relation("ProjectManager")
+  projectsCreated       Project[]              @relation("ProjectCreator")
+  sitesEngineered       Site[]                 @relation("SiteEngineer")
+  transactionsCreated   InventoryTransaction[] @relation("TransactionCreator")
+  purchaseOrdersCreated PurchaseOrder[]        @relation("PoCreator")
+  purchaseOrdersApproved PurchaseOrder[]       @relation("PoApprover")
+  usagesRecorded        MaterialUsage[]        @relation("UsageRecorder")
+  wastagesRecorded      WastageRecord[]        @relation("WastageRecorder")
+  transfersRequested    StockTransfer[]        @relation("TransferRequester")
+  transfersApproved     StockTransfer[]        @relation("TransferApprover")
+  attendanceRecorded    LabourAttendance[]     @relation("AttendanceRecorder")
+  expensesRecorded      ProjectExpense[]       @relation("ExpenseRecorder")
+  enquiriesAssigned     ClientEnquiry[]        @relation("EnquiryAssigned")
+  progressReported      SiteProgress[]         @relation("ProgressReporter")
+  activityLogs          ActivityLog[]
+
+  @@map("users")
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+}
+
+model Project {
+  id          Int           @id @default(autoincrement())
+  projectCode String        @unique  @map("project_code")
+  name        String        
+  description String?       
+  location    String?       
+  clientName  String?        @map("client_name")
+  startDate   DateTime?     @map("start_date") 
+  endDate     DateTime?     @map("end_date") 
+  budget      Decimal       @default(0) 
+  status String @default("planning")
+  stage       String?       @default("foundation") 
+  managerId   Int?          @map("manager_id")
+  createdBy   Int           @map("created_by")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  manager            User?                 @relation("ProjectManager", fields: [managerId], references: [id], onDelete: SetNull)
+  creator            User                  @relation("ProjectCreator", fields: [createdBy], references: [id])
+  sites              Site[]
+  purchaseOrders     PurchaseOrder[]
+  expenses           ProjectExpense[]
+  paymentMilestones  PaymentMilestone[]
+  subcontractorTasks SubcontractorTask[]
+
+  @@map("projects")
+  @@index([status])
+  @@index([managerId])
+}
+
+model Site {
+  id         Int      @id @default(autoincrement())
+  siteCode   String   @unique  @map("site_code")
+  name       String   
+  location   String?  
+  address    String?  
+  projectId  Int?     @map("project_id")
+  engineerId Int?     @map("engineer_id")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  project            Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  engineer           User?                @relation("SiteEngineer", fields: [engineerId], references: [id], onDelete: SetNull)
+  inventory          Inventory[]
+  transactions       InventoryTransaction[]
+  purchaseOrders     PurchaseOrder[]
+  usages             MaterialUsage[]
+  wastages           WastageRecord[]
+  transfersFrom      StockTransfer[]      @relation("TransferFromSite")
+  transfersTo        StockTransfer[]      @relation("TransferToSite")
+  labourAttendance   LabourAttendance[]
+  equipmentMachinery EquipmentMachinery[]
+  progress           SiteProgress[]
+  alerts             Alert[]
+
+  @@map("sites")
+  @@index([projectId])
+  @@index([isActive])
+}
+
+model MaterialCategory {
+  id          Int        @id @default(autoincrement())
+  name        String     
+  description String?    
+  color       String?    @default("#6B7280") 
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  materials Material[]
+
+  @@map("material_categories")
+}
+
+model Supplier {
+  id           Int             @id @default(autoincrement())
+  supplierCode String          @unique  @map("supplier_code")
+  name         String          
+  contactPerson String?         @map("contact_person")
+  email        String?         
+  phone        String?         
+  address      String?         
+  city         String?         
+  state        String?         
+  gstNumber    String?          @map("gst_number")
+  paymentTerms String?          @map("payment_terms")
+  creditLimit  Decimal         @default(0)  @map("credit_limit")
+  isActive     Boolean         @default(true) @map("is_active")
+  rating       Decimal         @default(0) 
+  notes        String?         
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  materials      Material[]
+  purchaseOrders PurchaseOrder[]
+
+  @@map("suppliers")
+  @@index([isActive])
+  @@index([name])
+}
+
+model Material {
+  id               Int      @id @default(autoincrement())
+  materialCode     String   @unique  @map("material_code")
+  name             String   
+  categoryId       Int?     @map("category_id")
+  description      String?  
+  unit             String   
+  costPerUnit      Decimal  @default(0)  @map("cost_per_unit")
+  minimumThreshold Decimal  @default(0)  @map("minimum_threshold")
+  reorderQuantity  Decimal  @default(0)  @map("reorder_quantity")
+  supplierId       Int?     @map("supplier_id")
+  specifications   String?  
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  category     MaterialCategory?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  supplier     Supplier?              @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  inventory    Inventory[]
+  transactions InventoryTransaction[]
+  poItems      PurchaseOrderItem[]
+  usages       MaterialUsage[]
+  wastages     WastageRecord[]
+  transfers    StockTransfer[]
+  alerts       Alert[]
+
+  @@map("materials")
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([name])
+}
+
+model Inventory {
+  id            Int      @id @default(autoincrement())
+  materialId    Int      @map("material_id")
+  siteId        Int      @map("site_id")
+  currentStock  Decimal  @default(0)  @map("current_stock")
+  reservedStock Decimal  @default(0)  @map("reserved_stock")
+  lastUpdated   DateTime @default(now()) @updatedAt @map("last_updated")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  material     Material               @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  site         Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  transactions InventoryTransaction[]
+
+  @@unique([materialId, siteId], name: "uniq_material_site")
+  @@map("inventory")
+  @@index([materialId])
+  @@index([siteId])
+}
+
+model InventoryTransaction {
+  id              Int             @id @default(autoincrement())
+  inventoryId     Int             @map("inventory_id")
+  materialId      Int             @map("material_id")
+  siteId          Int             @map("site_id")
+  transactionType String @map("transaction_type")
+  quantity        Decimal         
+  balanceAfter    Decimal          @map("balance_after")
+  unitCost        Decimal?        @default(0)  @map("unit_cost")
+  totalCost       Decimal?        @default(0)  @map("total_cost")
+  referenceId     Int?            @map("reference_id")
+  referenceType   String?          @map("reference_type")
+  notes           String?         
+  createdBy       Int?            @map("created_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  material  Material  @relation(fields: [materialId], references: [id])
+  site      Site      @relation(fields: [siteId], references: [id])
+  creator   User?     @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@map("inventory_transactions")
+  @@index([materialId, siteId], name: "idx_material_site")
+  @@index([transactionType])
+  @@index([createdAt])
+}
+
+model PurchaseOrder {
+  id               Int           @id @default(autoincrement())
+  poNumber         String        @unique  @map("po_number")
+  supplierId       Int           @map("supplier_id")
+  projectId        Int?          @map("project_id")
+  siteId           Int?          @map("site_id")
+  orderDate        DateTime      @map("order_date") 
+  expectedDelivery DateTime?     @map("expected_delivery") 
+  actualDelivery   DateTime?     @map("actual_delivery") 
+  subtotal         Decimal       @default(0) 
+  taxAmount        Decimal       @default(0)  @map("tax_amount")
+  totalAmount      Decimal       @default(0)  @map("total_amount")
+  status String      @default("draft")
+  paymentStatus String @default("pending") @map("payment_status")
+  deliveryAddress  String?        @map("delivery_address")
+  termsConditions  String?        @map("terms_conditions")
+  notes            String?       
+  createdBy        Int           @map("created_by")
+  approvedBy       Int?          @map("approved_by")
+  approvedAt       DateTime?     @map("approved_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  supplier Supplier            @relation(fields: [supplierId], references: [id])
+  project  Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  site     Site?               @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  creator  User                @relation("PoCreator", fields: [createdBy], references: [id])
+  approver User?               @relation("PoApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
+  items    PurchaseOrderItem[]
+  alerts   Alert[]
+
+  @@map("purchase_orders")
+  @@index([supplierId])
+  @@index([status])
+  @@index([orderDate])
+}
+
+model PurchaseOrderItem {
+  id               Int      @id @default(autoincrement())
+  poId             Int      @map("po_id")
+  materialId       Int      @map("material_id")
+  quantity         Decimal  
+  unitPrice        Decimal   @map("unit_price")
+  totalPrice       Decimal   @map("total_price")
+  receivedQuantity Decimal  @default(0)  @map("received_quantity")
+  taxPercentage    Decimal  @default(0)  @map("tax_percentage")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  purchaseOrder PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+  material      Material      @relation(fields: [materialId], references: [id])
+
+  @@map("purchase_order_items")
+  @@index([poId])
+  @@index([materialId])
+}
+
+model MaterialUsage {
+  id           Int      @id @default(autoincrement())
+  usageCode    String   @unique  @map("usage_code")
+  siteId       Int      @map("site_id")
+  materialId   Int      @map("material_id")
+  quantityUsed Decimal   @map("quantity_used")
+  unitCost     Decimal? @default(0)  @map("unit_cost")
+  totalCost    Decimal? @default(0)  @map("total_cost")
+  usageDate    DateTime @map("usage_date") 
+  purpose      String?  
+  workType     String?   @map("work_type")
+  floorLevel   String?   @map("floor_level")
+  remarks      String?  
+  recordedBy   Int      @map("recorded_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  site     Site     @relation(fields: [siteId], references: [id])
+  material Material @relation(fields: [materialId], references: [id])
+  recorder User     @relation("UsageRecorder", fields: [recordedBy], references: [id])
+
+  @@map("material_usage")
+  @@index([siteId])
+  @@index([materialId])
+  @@index([usageDate])
+}
+
+model WastageRecord {
+  id             Int           @id @default(autoincrement())
+  wastageCode    String        @unique  @map("wastage_code")
+  siteId         Int           @map("site_id")
+  materialId     Int           @map("material_id")
+  quantityWasted Decimal        @map("quantity_wasted")
+  unitCost       Decimal?      @default(0)  @map("unit_cost")
+  totalCost      Decimal?      @default(0)  @map("total_cost")
+  wastageDate    DateTime      @map("wastage_date") 
+  reason String
+  description    String?       
+  preventable    Boolean       @default(false)
+  remarks        String?       
+  recordedBy     Int           @map("recorded_by")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  site     Site     @relation(fields: [siteId], references: [id])
+  material Material @relation(fields: [materialId], references: [id])
+  recorder User     @relation("WastageRecorder", fields: [recordedBy], references: [id])
+
+  @@map("wastage_records")
+  @@index([siteId])
+  @@index([materialId])
+  @@index([wastageDate])
+}
+
+model StockTransfer {
+  id           Int            @id @default(autoincrement())
+  transferCode String         @unique  @map("transfer_code")
+  fromSiteId   Int            @map("from_site_id")
+  toSiteId     Int            @map("to_site_id")
+  materialId   Int            @map("material_id")
+  quantity     Decimal        
+  transferDate DateTime       @map("transfer_date") 
+  status String @default("pending")
+  reason       String?        
+  requestedBy  Int            @map("requested_by")
+  approvedBy   Int?           @map("approved_by")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  fromSite  Site     @relation("TransferFromSite", fields: [fromSiteId], references: [id])
+  toSite    Site     @relation("TransferToSite", fields: [toSiteId], references: [id])
+  material  Material @relation(fields: [materialId], references: [id])
+  requester User     @relation("TransferRequester", fields: [requestedBy], references: [id])
+  approver  User?    @relation("TransferApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  @@map("stock_transfers")
+}
+
+model Alert {
+  id          Int       @id @default(autoincrement())
+  type String
+  title       String    
+  message     String    
+  materialId  Int?      @map("material_id")
+  siteId      Int?      @map("site_id")
+  poId        Int?      @map("po_id")
+  isRead      Boolean   @default(false) @map("is_read")
+  isResolved  Boolean   @default(false) @map("is_resolved")
+  severity String  @default("medium")
+  resolvedAt  DateTime? @map("resolved_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  material      Material?      @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  site          Site?          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  purchaseOrder PurchaseOrder? @relation(fields: [poId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+  @@index([type])
+  @@index([isRead])
+  @@index([severity])
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?     @map("user_id")
+  userName   String?   @map("user_name")
+  action     String   
+  entityType String?   @map("entity_type")
+  entityId   Int?     @map("entity_id")
+  entityName String?   @map("entity_name")
+  description String? 
+  ipAddress  String?   @map("ip_address")
+  oldData    String?    @map("old_data")
+  newData    String?    @map("new_data")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("activity_logs")
+  @@index([userId])
+  @@index([entityType, entityId], name: "idx_entity")
+  @@index([createdAt])
+}
+
+model LabourAttendance {
+  id               Int      @id @default(autoincrement())
+  siteId           Int      @map("site_id")
+  date             DateTime 
+  totalWorkers     Int      @default(0) @map("total_workers")
+  skilledWorkers   Int      @default(0) @map("skilled_workers")
+  unskilledWorkers Int      @default(0) @map("unskilled_workers")
+  contractorName   String?   @map("contractor_name")
+  notes            String?  
+  recordedBy       Int      @map("recorded_by")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  site     Site         @relation(fields: [siteId], references: [id])
+  recorder User         @relation("AttendanceRecorder", fields: [recordedBy], references: [id])
+  wages    LabourWage[]
+
+  @@map("labour_attendance")
+  @@index([siteId, date], name: "idx_site_date")
+}
+
+model LabourWage {
+  id            Int      @id @default(autoincrement())
+  attendanceId  Int      @map("attendance_id")
+  amountPaid    Decimal  @default(0)  @map("amount_paid")
+  paymentDate   DateTime @map("payment_date") 
+  paymentMethod String?   @map("payment_method")
+  remarks       String?  
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  attendance LabourAttendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+
+  @@map("labour_wages")
+}
+
+model ProjectExpense {
+  id          Int      @id @default(autoincrement())
+  projectId   Int      @map("project_id")
+  category    String   
+  amount      Decimal  
+  expenseDate DateTime @map("expense_date") 
+  description String?  
+  incurredBy  String?   @map("incurred_by")
+  recordedBy  Int      @map("recorded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  project  Project @relation(fields: [projectId], references: [id])
+  recorder User    @relation("ExpenseRecorder", fields: [recordedBy], references: [id])
+
+  @@map("project_expenses")
+}
+
+model ClientEnquiry {
+  id          Int           @id @default(autoincrement())
+  clientName  String         @map("client_name")
+  contactInfo String?        @map("contact_info")
+  enquiryDate DateTime      @map("enquiry_date") 
+  details     String?       
+  status String @default("new")
+  assignedTo  Int?          @map("assigned_to")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  assigned User? @relation("EnquiryAssigned", fields: [assignedTo], references: [id], onDelete: SetNull)
+
+  @@map("client_enquiries")
+}
+
+model PaymentMilestone {
+  id            Int             @id @default(autoincrement())
+  projectId     Int             @map("project_id")
+  milestoneName String           @map("milestone_name")
+  amount        Decimal         
+  dueDate       DateTime?       @map("due_date") 
+  status String @default("pending")
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@map("payment_milestones")
+}
+
+model SubcontractorTask {
+  id                Int                     @id @default(autoincrement())
+  projectId         Int                     @map("project_id")
+  subcontractorName String                   @map("subcontractor_name")
+  taskDescription   String                   @map("task_description")
+  startDate         DateTime?               @map("start_date") 
+  endDate           DateTime?               @map("end_date") 
+  status String @default("pending")
+  cost              Decimal?                
+  createdAt         DateTime                @default(now()) @map("created_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@map("subcontractor_tasks")
+}
+
+model EquipmentMachinery {
+  id            Int             @id @default(autoincrement())
+  siteId        Int             @map("site_id")
+  equipmentName String           @map("equipment_name")
+  model         String?         
+  status String @default("active")
+  assignedDate  DateTime?       @map("assigned_date") 
+  notes         String?         
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  site Site @relation(fields: [siteId], references: [id])
+
+  @@map("equipment_machinery")
+}
+
+model SiteProgress {
+  id                 Int      @id @default(autoincrement())
+  siteId             Int      @map("site_id")
+  reportedBy         Int      @map("recorded_by")
+  reportDate         DateTime @map("report_date") 
+  progressPercentage Decimal  @default(0)  @map("progress_percentage")
+  workCompleted      String?   @map("work_completed")
+  issuesFaced        String?   @map("issues_faced")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  // Relations
+  site     Site @relation(fields: [siteId], references: [id])
+  reporter User @relation("ProgressReporter", fields: [reportedBy], references: [id])
+
+  @@map("site_progress")
+}
