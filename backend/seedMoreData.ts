@@ -11,57 +11,140 @@ async function main() {
   }
   
   if (project) {
-    const tasks = [
-      // Week 1
-      { day: 5, date: '2026-06-05', title: 'Review 1 Preparation' },
-      { day: 6, date: '2026-06-06', title: 'REVIEW PRESENTATION 1' },
-      // Week 2
-      { day: 7, date: '2026-06-08', title: 'Review 1 Feedback + Week 2 Prep' },
-      { day: 8, date: '2026-06-09', title: 'Literature Survey + Existing System Analysis' },
-      { day: 9, date: '2026-06-10', title: 'Proposed System Description + DB Design' },
-      { day: 10, date: '2026-06-11', title: 'Database Setup + First Backend Route + Main Form' },
-      { day: 11, date: '2026-06-12', title: 'List API + Dashboard HTML' },
-      { day: 12, date: '2026-06-13', title: 'GitHub Workflow + Environment Validation' },
-      // Week 3
-      { day: 13, date: '2026-06-15', title: 'Core Logic Design + Workflow Plan' },
-      { day: 14, date: '2026-06-16', title: 'Week 2 Review Prep + Literature Survey Final' },
-      { day: 15, date: '2026-06-17', title: 'System Architecture Diagram + Full Stack Plan' },
-      { day: 16, date: '2026-06-18', title: 'Connect Frontend Form to Backend API' },
-      { day: 17, date: '2026-06-19', title: 'REVIEW PRESENTATION 2 - Day 1' },
-      { day: 18, date: '2026-06-20', title: 'REVIEW PRESENTATION 2 - Day 2 + Core Feature Build' },
-      // Week 4
-      { day: 19, date: '2026-06-22', title: 'Core Workflow Complete + Alerts/Outputs' },
-      { day: 20, date: '2026-06-23', title: 'Detail Page + Full Integration Test' },
-      { day: 21, date: '2026-06-24', title: 'UI Polish + Error Handling' },
-      { day: 22, date: '2026-06-25', title: 'Deployment Setup' },
-      { day: 23, date: '2026-06-26', title: 'Final Testing + Bug Fixes + Report Part 1' },
-      { day: 24, date: '2026-06-27', title: 'Project Report Part 2 + Demo Video + Final PPT' },
-      // Week 5
-      { day: 25, date: '2026-06-29', title: 'REVIEW PRESENTATION 3 - Day 1 + Final Submissions' },
-      { day: 26, date: '2026-06-30', title: 'REVIEW PRESENTATION 3 - Day 2 + Internship Closing' },
+    // Delete any existing subcontractor tasks first to make room for realistic data
+    await prisma.subcontractorTask.deleteMany({ where: { projectId: project.id } });
+
+    const subcontractorTasksData = [
+      {
+        projectId: project.id,
+        subcontractorName: 'GroundForce Excavations',
+        taskDescription: 'Site clearing, excavation, and leveling for foundation work',
+        startDate: new Date('2026-06-01'),
+        endDate: new Date('2026-06-05'),
+        status: 'completed',
+        cost: 150000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'Apex Concrete Solutions',
+        taskDescription: 'Pouring foundation concrete footing and pile cap reinforcement',
+        startDate: new Date('2026-06-06'),
+        endDate: new Date('2026-06-12'),
+        status: 'completed',
+        cost: 280000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'BuildCraft Masonry Ltd',
+        taskDescription: 'Ground floor brickwork masonry and partition wall layout',
+        startDate: new Date('2026-06-13'),
+        endDate: new Date('2026-06-20'),
+        status: 'completed',
+        cost: 185000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'FlowTech Plumbing & Piping',
+        taskDescription: 'Underground drainage pipes layout and sewage line connections',
+        startDate: new Date('2026-06-14'),
+        endDate: new Date('2026-06-18'),
+        status: 'completed',
+        cost: 95000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'VoltSync Electricals',
+        taskDescription: 'Conduit laying for electrical wiring in ground floor walls and slabs',
+        startDate: new Date('2026-06-16'),
+        endDate: new Date('2026-06-21'),
+        status: 'completed',
+        cost: 110000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'ShieldGuard Waterproofing',
+        taskDescription: 'Basement wall waterproofing and retaining wall protective coating',
+        startDate: new Date('2026-06-19'),
+        endDate: new Date('2026-06-23'),
+        status: 'completed',
+        cost: 75000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'Apex Concrete Solutions',
+        taskDescription: 'Casting columns and beams for the first floor roof slab',
+        startDate: new Date('2026-06-22'),
+        endDate: new Date('2026-06-28'),
+        status: 'completed',
+        cost: 320000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'BuildCraft Masonry Ltd',
+        taskDescription: 'First floor brick wall masonry and window frame fixing',
+        startDate: new Date('2026-06-25'),
+        endDate: new Date('2026-07-02'),
+        status: 'in_progress',
+        cost: 190000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'VoltSync Electricals',
+        taskDescription: 'Pulling wires and installing sub-distribution boards for first floor',
+        startDate: new Date('2026-06-28'),
+        endDate: new Date('2026-07-05'),
+        status: 'in_progress',
+        cost: 130000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'FlowTech Plumbing & Piping',
+        taskDescription: 'Installing bathroom vertical soil/waste pipes and supply lines',
+        startDate: new Date('2026-06-29'),
+        endDate: new Date('2026-07-06'),
+        status: 'in_progress',
+        cost: 115000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'ProFinish Drywall & Plaster',
+        taskDescription: 'Internal plastering and wall putty application for ground floor',
+        startDate: new Date('2026-07-02'),
+        endDate: new Date('2026-07-12'),
+        status: 'pending',
+        cost: 140000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'Elite Tiles & Stones',
+        taskDescription: 'Laying vitrified flooring tiles and bathroom wall cladding',
+        startDate: new Date('2026-07-08'),
+        endDate: new Date('2026-07-22'),
+        status: 'pending',
+        cost: 220000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'SafeGuard Fire Systems',
+        taskDescription: 'Installing fire sprinkler main lines and smoke detector conduits',
+        startDate: new Date('2026-07-10'),
+        endDate: new Date('2026-07-20'),
+        status: 'pending',
+        cost: 165000
+      },
+      {
+        projectId: project.id,
+        subcontractorName: 'DecoStyle Painters',
+        taskDescription: 'Applying primer coat and interior emulsion paints for ground floor',
+        startDate: new Date('2026-07-15'),
+        endDate: new Date('2026-07-25'),
+        status: 'pending',
+        cost: 85000
+      }
     ];
 
-    const students = ['Student 1 - Frontend', 'Student 2 - Backend', 'Student 3 - Testing'];
-
-    for (const t of tasks) {
-      for (const s of students) {
-        const exists = await prisma.subcontractorTask.findFirst({
-          where: { projectId: project.id, subcontractorName: s, taskDescription: `Day ${t.day}: ${t.title}` }
-        });
-        if (!exists) {
-          await prisma.subcontractorTask.create({
-            data: {
-              projectId: project.id,
-              subcontractorName: s,
-              taskDescription: `Day ${t.day}: ${t.title}`,
-              startDate: new Date(t.date),
-              endDate: new Date(t.date),
-              status: t.day <= 22 ? 'completed' : 'pending',
-              cost: 0
-            }
-          });
-        }
-      }
+    for (const t of subcontractorTasksData) {
+      await prisma.subcontractorTask.create({ data: t });
     }
   }
 
