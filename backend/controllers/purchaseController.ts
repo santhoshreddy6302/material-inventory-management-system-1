@@ -162,6 +162,8 @@ export const create = async (req: Request, res: Response) => {
       });
       
       return po;
+    }, {
+      timeout: 20000
     });
     
     return created(res, newPo, 'Purchase order created successfully');

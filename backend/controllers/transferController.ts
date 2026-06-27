@@ -183,6 +183,8 @@ export const updateStatus = async (req: Request, res: Response) => {
           data: { status }
         });
       }
+    }, {
+      timeout: 20000
     });
     
     return success(res, null, 'Transfer status updated');

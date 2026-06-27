@@ -156,6 +156,8 @@ export const create = async (req: Request, res: Response) => {
       }
       
       return usageRec;
+    }, {
+      timeout: 20000
     });
     
     return created(res, newUsage, 'Usage recorded successfully');

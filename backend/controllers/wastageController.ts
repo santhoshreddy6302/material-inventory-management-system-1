@@ -147,6 +147,8 @@ export const create = async (req: Request, res: Response) => {
       }
       
       return { id: record.id, code };
+    }, {
+      timeout: 20000
     });
     
     return created(res, result, 'Wastage recorded successfully');

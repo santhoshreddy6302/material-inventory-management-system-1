@@ -234,6 +234,8 @@ export const adjustStock = async (req: Request, res: Response) => {
       }
 
       return { material_id: mId, site_id: sId, new_stock: newStock };
+    }, {
+      timeout: 20000
     });
 
     return success(res, result, 'Stock adjusted successfully');
