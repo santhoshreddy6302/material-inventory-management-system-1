@@ -19,6 +19,7 @@ import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
+import { Checkbox } from '../../components/ui/checkbox';
 
 interface PaginationData {
   total: number;
@@ -51,6 +52,7 @@ const siteSchema = z.object({
   address: z.string().optional(),
   project_id: z.string().optional(),
   engineer_id: z.string().optional(),
+  is_active: z.boolean().default(true),
 });
 type SiteFormValues = z.infer<typeof siteSchema>;
 
@@ -71,7 +73,7 @@ export default function SiteList() {
 
   const form = useForm<SiteFormValues>({
     resolver: zodResolver(siteSchema),
-    defaultValues: { name: '', location: '', address: '', project_id: 'none', engineer_id: 'none' }
+    defaultValues: { name: '', location: '', address: '', project_id: 'none', engineer_id: 'none', is_active: true }
   });
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function SiteList() {
 
   const openAdd = () => {
     setEditing(null);
-    form.reset({ name: '', location: '', address: '', project_id: 'none', engineer_id: 'none' });
+    form.reset({ name: '', location: '', address: '', project_id: 'none', engineer_id: 'none', is_active: true });
     setModal(true);
   };
 
@@ -103,7 +105,8 @@ export default function SiteList() {
       location: item.location || '',
       address: item.address || '',
       project_id: item.project_id ? String(item.project_id) : 'none',
-      engineer_id: item.engineer_id ? String(item.engineer_id) : 'none'
+      engineer_id: item.engineer_id ? String(item.engineer_id) : 'none',
+      is_active: item.is_active
     });
     setModal(true);
   };
@@ -261,6 +264,19 @@ export default function SiteList() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                {editing && (
+                  <FormField control={form.control} name="is_active" render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 col-span-2">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Active Status</FormLabel>
+                        <p className="text-xs text-muted-foreground">Mark this site as active to allow allocations and transfers.</p>
+                      </div>
+                    </FormItem>
+                  )} />
+                )}
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setModal(false)}>Cancel</Button>
