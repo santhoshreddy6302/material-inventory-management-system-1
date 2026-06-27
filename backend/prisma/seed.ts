@@ -602,6 +602,67 @@ async function main() {
 
   console.log('📈 Site progress seeded');
 
+  // Seed extra Machinery
+  const machinery = [
+    { siteId: sitesList[0].id, equipmentName: 'JCB 3DX Backhoe Loader', model: '2024 Heavy Duty', status: 'active', assignedDate: new Date('2026-06-01'), notes: 'Operator assigned. Fuel efficiency within normal range.' },
+    { siteId: sitesList[1].id, equipmentName: 'Concrete Mixer Truck', model: 'Schwing Stetter AM 6 SH', status: 'active', assignedDate: new Date('2026-06-10'), notes: 'Drum cleaned daily. Mechanical parts checked.' },
+    { siteId: sitesList[2].id, equipmentName: 'Caterpillar 320 Excavator', model: 'CAT 320D3', status: 'maintenance', assignedDate: new Date('2026-06-15'), notes: 'Hydraulic pump service pending. Outage expected for 2 days.' },
+    { siteId: sitesList[3].id, equipmentName: 'Toyota 2.5T Forklift', model: 'Toyota 8FG25', status: 'active', assignedDate: new Date('2026-06-18'), notes: 'Used for material unloading in warehouse.' },
+    { siteId: sitesList[4].id, equipmentName: 'Piling Rig Machine', model: 'MAIT HR 130', status: 'active', assignedDate: new Date('2026-06-05'), notes: 'Bored piling foundation work completed.' }
+  ];
+  for (const m of machinery) {
+    await prisma.equipmentMachinery.create({ data: m });
+  }
+  console.log('⚙️ Additional equipment machinery seeded');
+
+  // Seed extra Site Progress
+  const progress = [
+    { siteId: sitesList[0].id, reportedBy: engineer.id, reportDate: new Date('2026-06-25'), progressPercentage: 65.5, workCompleted: 'Slab casting for 4th floor completed. Masonry work in progress on 2nd and 3rd floors.', issuesFaced: 'None' },
+    { siteId: sitesList[1].id, reportedBy: engineer.id, reportDate: new Date('2026-06-26'), progressPercentage: 32.0, workCompleted: 'Pillar column casting started for ground floor. Plumbing pipeline layout completed.', issuesFaced: 'Slight cement supply delay due to logistics.' },
+    { siteId: sitesList[2].id, reportedBy: engineer.id, reportDate: new Date('2026-06-24'), progressPercentage: 12.5, workCompleted: 'Excavation completed. Steel reinforcement laying for foundation commenced.', issuesFaced: 'Waterlogging in basement resolved with pumps.' },
+    { siteId: sitesList[3].id, reportedBy: engineer.id, reportDate: new Date('2026-06-20'), progressPercentage: 85.0, workCompleted: 'Steel structure erection fully completed. Roofing sheets installation is 80% done.', issuesFaced: 'Minor labor shortage due to harvest season.' },
+    { siteId: sitesList[4].id, reportedBy: engineer.id, reportDate: new Date('2026-06-22'), progressPercentage: 45.8, workCompleted: 'Concrete piling and pier caps completed for piers P1 through P5. Girder launch in progress.', issuesFaced: 'Heavy traffic diversion approvals delayed by 2 days.' }
+  ];
+  for (const p of progress) {
+    await prisma.siteProgress.create({ data: p });
+  }
+  console.log('📈 Additional site progress reports seeded');
+
+  // Seed extra Alerts
+  const alerts = [
+    { type: 'low_stock', title: 'Low Stock Alert: TMT Steel Bars Fe500', message: 'TMT Steel Bars Fe500 at City Mall Main Site is below the minimum threshold of 10 Metric Tons.', severity: 'high', siteId: sitesList[2].id, materialId: materialsList[1].id },
+    { type: 'po_approval', title: 'PO Approval Pending: PO-2026-003', message: 'PO-2026-003 for Cement Traders Co requires immediate approval from Raj Kumar (Project Manager).', severity: 'medium' },
+    { type: 'delivery_due', title: 'Delivery Due Alert: PO-2026-001', message: 'Delivery for PO-2026-001 from BuildMat Supplies Pvt Ltd is overdue by 3 days.', severity: 'high' },
+    { type: 'budget_exceeded', title: 'Budget Exceeded Alert: Greenfield Residential Complex', message: 'Expenses for Greenfield Residential Complex have reached 95% of the total allocated budget.', severity: 'critical' }
+  ];
+  for (const a of alerts) {
+    await prisma.alert.create({ data: a });
+  }
+  console.log('🚨 Additional alerts seeded');
+
+  // Seed extra Stock Transfers
+  const transfers = [
+    { transferCode: 'TRF-ABC101', fromSiteId: sitesList[0].id, toSiteId: sitesList[1].id, materialId: materialsList[0].id, quantity: 50, transferDate: new Date('2026-06-21'), status: 'completed', reason: 'Surplus cement transfer', requestedBy: engineer.id, approvedBy: pm.id },
+    { transferCode: 'TRF-ABC102', fromSiteId: sitesList[2].id, toSiteId: sitesList[3].id, materialId: materialsList[1].id, quantity: 2.5, transferDate: new Date('2026-06-22'), status: 'in_transit', reason: 'Urgent steel shortage reinforcement', requestedBy: engineer.id },
+    { transferCode: 'TRF-ABC103', fromSiteId: sitesList[3].id, toSiteId: sitesList[4].id, materialId: materialsList[2].id, quantity: 10, transferDate: new Date('2026-06-24'), status: 'pending', reason: 'Excess red bricks transfer', requestedBy: engineer.id }
+  ];
+  for (const t of transfers) {
+    await prisma.stockTransfer.create({ data: t });
+  }
+  console.log('🚛 Stock transfers seeded');
+
+  // Seed extra Labour Attendance
+  const labour = [
+    { siteId: sitesList[1].id, date: new Date('2026-06-25'), totalWorkers: 24, skilledWorkers: 10, unskilledWorkers: 14, contractorName: 'BuildForce Labors', notes: 'Foundation columns curing and site cleaning.', recordedBy: engineer.id },
+    { siteId: sitesList[2].id, date: new Date('2026-06-26'), totalWorkers: 42, skilledWorkers: 18, unskilledWorkers: 24, contractorName: 'Apex Construction Labours', notes: 'Steel mesh placement and basement layout marking.', recordedBy: engineer.id },
+    { siteId: sitesList[3].id, date: new Date('2026-06-24'), totalWorkers: 18, skilledWorkers: 8, unskilledWorkers: 10, contractorName: 'SafeHeight Rigging', notes: 'Roof sheeting installation crew.', recordedBy: engineer.id },
+    { siteId: sitesList[4].id, date: new Date('2026-06-25'), totalWorkers: 30, skilledWorkers: 12, unskilledWorkers: 18, contractorName: 'BridgeBuilders Ltd', notes: 'Piling machine support crew and site safety safety engineers.', recordedBy: engineer.id }
+  ];
+  for (const l of labour) {
+    await prisma.labourAttendance.create({ data: l });
+  }
+  console.log('👷 Additional labour attendance seeded');
+
   console.log('🎉 Database seeding complete!');
 }
 

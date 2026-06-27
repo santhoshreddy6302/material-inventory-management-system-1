@@ -16,6 +16,9 @@ RUN npx prisma generate
 # Build TypeScript code
 RUN npm run build
 
+# Push database schema and seed data into SQLite dev.db
+RUN npx prisma db push --accept-data-loss && node dist/prisma/seed.js
+
 # Production stage
 FROM node:20-alpine
 
