@@ -34,17 +34,20 @@ export const getOne = async (req: Request, res: Response) => {
 
 export const create = async (req: Request, res: Response) => {
   try {
-    const formattedData: any = {};
-    for (const [k, v] of Object.entries(req.body)) {
-      const camel = k.replace(/_([a-z])/g, g => g[1].toUpperCase());
-      if (camel.toLowerCase().includes('date') && typeof v === 'string') {
-        formattedData[camel] = new Date(v);
-      } else {
-        formattedData[camel] = v;
+    const { project_id, category, amount, description, incurred_by, expense_date } = req.body;
+    
+    const row = await prisma.projectExpense.create({
+      data: {
+        category,
+        amount: Number(amount),
+        description: description || null,
+        incurredBy: incurred_by || null,
+        expenseDate: new Date(expense_date),
+        project: { connect: { id: parseInt(project_id, 10) } },
+        recorder: { connect: { id: (req as any).user.id } }
       }
-    }
-
-    const row = await (prisma as any).projectExpense.create({ data: formattedData });
+    });
+    
     return created(res, row, 'Created successfully');
   } catch (err: any) {
     return error(res, err.message, 500);
@@ -54,20 +57,20 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const formattedData: any = {};
-    for (const [k, v] of Object.entries(req.body)) {
-      const camel = k.replace(/_([a-z])/g, g => g[1].toUpperCase());
-      if (camel.toLowerCase().includes('date') && typeof v === 'string') {
-        formattedData[camel] = new Date(v);
-      } else {
-        formattedData[camel] = v;
-      }
-    }
-
-    const row = await (prisma as any).projectExpense.update({
+    const { project_id, category, amount, description, incurred_by, expense_date } = req.body;
+    
+    const row = await prisma.projectExpense.update({
       where: { id },
-      data: formattedData
+      data: {
+        category: category || undefined,
+        amount: amount !== undefined ? Number(amount) : undefined,
+        description: description !== undefined ? description : undefined,
+        incurredBy: incurred_by !== undefined ? incurred_by : undefined,
+        expenseDate: expense_date ? new Date(expense_date) : undefined,
+        project: project_id ? { connect: { id: parseInt(project_id, 10) } } : undefined
+      }
     });
+    
     return success(res, row, 'Updated successfully');
   } catch (err: any) {
     return error(res, err.message, 500);
