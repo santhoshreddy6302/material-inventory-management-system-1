@@ -88,8 +88,8 @@ export default function CreatePO() {
     materialService.getAll({ limit: 100, is_active: 'true' }).then((r: any) => { if (r.data.success) setMaterials(r.data.data); });
   }, []);
 
-  const watchItems = form.watch("items");
-  const subtotal = watchItems.reduce((acc, item) => acc + (parseFloat(item.quantity || '0') * parseFloat(item.unit_price || '0')), 0);
+  const watchItems = form.watch("items") || [];
+  const subtotal = watchItems.reduce((acc, item) => acc + (parseFloat(item?.quantity || '0') * parseFloat(item?.unit_price || '0')), 0);
 
   const onSubmit = async (values: POFormValues) => {
     setSaving(true);
