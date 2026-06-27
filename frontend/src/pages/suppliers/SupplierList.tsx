@@ -17,6 +17,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
+import { Checkbox } from '../../components/ui/checkbox';
 
 interface PaginationData {
   total: number;
@@ -56,6 +57,7 @@ const supplierSchema = z.object({
   payment_terms: z.string().optional(),
   credit_limit: z.coerce.number().min(0).optional(),
   notes: z.string().optional(),
+  is_active: z.boolean().default(true),
 });
 type SupplierFormValues = z.infer<typeof supplierSchema>;
 
@@ -76,7 +78,8 @@ export default function SupplierList() {
     resolver: zodResolver(supplierSchema),
     defaultValues: {
       name: '', contact_person: '', email: '', phone: '', address: '', 
-      city: '', state: '', gst_number: '', payment_terms: '', credit_limit: 0, notes: ''
+      city: '', state: '', gst_number: '', payment_terms: '', credit_limit: 0, notes: '',
+      is_active: true
     }
   });
 
@@ -95,7 +98,8 @@ export default function SupplierList() {
     setEditing(null);
     form.reset({
       name: '', contact_person: '', email: '', phone: '', address: '', 
-      city: '', state: '', gst_number: '', payment_terms: '', credit_limit: 0, notes: ''
+      city: '', state: '', gst_number: '', payment_terms: '', credit_limit: 0, notes: '',
+      is_active: true
     });
     setModal(true);
   };
@@ -113,7 +117,8 @@ export default function SupplierList() {
       gst_number: item.gst_number || '',
       payment_terms: item.payment_terms || '',
       credit_limit: item.credit_limit || 0,
-      notes: item.notes || ''
+      notes: item.notes || '',
+      is_active: item.is_active
     });
     setModal(true);
   };
@@ -302,6 +307,19 @@ export default function SupplierList() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                {editing && (
+                  <FormField control={form.control} name="is_active" render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 col-span-2">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Active Status</FormLabel>
+                        <p className="text-xs text-muted-foreground">Mark this supplier as active to allow purchasing materials from them.</p>
+                      </div>
+                    </FormItem>
+                  )} />
+                )}
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setModal(false)}>Cancel</Button>
