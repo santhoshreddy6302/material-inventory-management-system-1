@@ -6,6 +6,7 @@ import * as z from 'zod';
 
 import { siteService } from '../../services/siteService';
 import { projectService } from '../../services/projectService';
+import { userService } from '../../services/userService';
 import Pagination from '../../components/common/Pagination';
 import SearchFilter from '../../components/common/SearchFilter';
 import toast from 'react-hot-toast';
@@ -65,6 +66,7 @@ export default function SiteList() {
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Site | null>(null);
   const [projects, setProjects] = useState<ProjectBrief[]>([]);
+  const [engineers, setEngineers] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
 
   const form = useForm<SiteFormValues>({
@@ -74,6 +76,7 @@ export default function SiteList() {
 
   useEffect(() => {
     projectService.getAll({ limit: 100 }).then(r => { if(r.data.success) setProjects(r.data.data); }).catch(console.error);
+    userService.getEngineers().then(r => { if(r.data?.success) setEngineers(r.data.data || []); }).catch(console.error);
   }, []);
 
   useEffect(() => { fetchData(); }, [page, search]);
@@ -226,6 +229,19 @@ export default function SiteList() {
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         {projects.map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="engineer_id" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Engineer</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Select engineer" /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {(engineers || []).map(e => <SelectItem key={e.id} value={String(e.id)}>{e.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />

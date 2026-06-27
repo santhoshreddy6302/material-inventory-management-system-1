@@ -140,3 +140,20 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
     return error(res, err.message, 500);
   }
 };
+
+export const getEngineers = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const engineers = await prisma.user.findMany({
+      where: { role: 'site_engineer', isActive: true },
+      select: {
+        id: true,
+        name: true,
+        email: true
+      },
+      orderBy: { name: 'asc' }
+    });
+    return success(res, engineers);
+  } catch (err: any) {
+    return error(res, err.message, 500);
+  }
+};

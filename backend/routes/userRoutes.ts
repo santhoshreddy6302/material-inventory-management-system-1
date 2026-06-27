@@ -1,12 +1,13 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { getAll, create, update, resetPassword } from '../controllers/userController';
+import { getAll, create, update, resetPassword, getEngineers } from '../controllers/userController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 
 const router = express.Router();
 
 router.use(authenticate);
+router.get('/engineers', getEngineers);
 router.get('/', authorize('admin'), getAll);
 router.post('/', authorize('admin'), [
   body('name').trim().notEmpty(),
