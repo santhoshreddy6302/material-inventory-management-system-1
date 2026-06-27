@@ -5,7 +5,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Adding more required data (All Tasks & 5+ POs)...');
   
-  const project = await prisma.project.findUnique({ where: { projectCode: 'PRJ-INTERN-01' } });
+  let project = await prisma.project.findUnique({ where: { projectCode: 'PRJ-INTERN-01' } });
+  if (!project) {
+    project = await prisma.project.findFirst();
+  }
   
   if (project) {
     const tasks = [
