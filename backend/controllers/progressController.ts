@@ -63,7 +63,12 @@ export const update = async (req: Request, res: Response) => {
 
     const row = await (prisma as any).siteProgress.update({
       where: { id },
-      data: formattedData
+      data: {
+        reportDate: formattedData.reportDate,
+        progressPercentage: formattedData.progressPercentage,
+        workCompleted: formattedData.workCompleted,
+        issuesFaced: formattedData.issuesFaced
+      }
     });
     return success(res, row, 'Updated successfully');
   } catch (err: any) {
