@@ -82,10 +82,10 @@ export default function CreatePO() {
   });
 
   useEffect(() => {
-    supplierService.getAllSimple().then((r: any) => { if (r.data.success) setSuppliers(r.data.data); });
-    projectService.getAll({ limit: 100 }).then((r: any) => { if (r.data.success) setProjects(r.data.data); });
-    siteService.getAllSimple().then((r: any) => { if (r.data.success) setSites(r.data.data); });
-    materialService.getAll({ limit: 100, is_active: 'true' }).then((r: any) => { if (r.data.success) setMaterials(r.data.data); });
+    supplierService.getAllSimple().then((r: any) => { if (r.data?.success) setSuppliers(r.data.data || []); }).catch(() => setSuppliers([]));
+    projectService.getAll({ limit: 100 }).then((r: any) => { if (r.data?.success) setProjects(r.data.data || []); }).catch(() => setProjects([]));
+    siteService.getAllSimple().then((r: any) => { if (r.data?.success) setSites(r.data.data || []); }).catch(() => setSites([]));
+    materialService.getAll({ limit: 100, is_active: 'true' }).then((r: any) => { if (r.data?.success) setMaterials(r.data.data || []); }).catch(() => setMaterials([]));
   }, []);
 
   const watchItems = form.watch("items") || [];
@@ -143,7 +143,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {suppliers.map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                      {(suppliers || []).map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -169,7 +169,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {projects.map(p => <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>)}
+                      {(projects || []).map(p => <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -181,7 +181,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select site" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {sites.map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                      {(sites || []).map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -231,7 +231,7 @@ export default function CreatePO() {
                         }} value={field.value}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Select material" /></SelectTrigger></FormControl>
                           <SelectContent>
-                            {materials.map(m => <SelectItem key={m.id} value={m.id.toString()}>{m.name} ({m.unit})</SelectItem>)}
+                            {(materials || []).map(m => <SelectItem key={m.id} value={m.id.toString()}>{m.name} ({m.unit})</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
