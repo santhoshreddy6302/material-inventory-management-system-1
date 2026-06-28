@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft, ShoppingCart } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,6 +56,9 @@ type POFormValues = z.infer<typeof poSchema>;
 
 export default function CreatePO() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = !!id;
+
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [sites, setSites] = useState<any[]>([]);
@@ -88,6 +91,33 @@ export default function CreatePO() {
     materialService.getAll({ limit: 100, is_active: 'true' }).then((r: any) => { if (r.data?.success) setMaterials(r.data.data || []); }).catch(() => setMaterials([]));
   }, []);
 
+  useEffect(() => {
+    if (isEdit && id) {
+      purchaseService.getOne(id).then((r: any) => {
+        if (r.data?.success) {
+          const po = r.data.data;
+          form.reset({
+            supplier_id: String(po.supplier_id),
+            order_date: po.order_date ? po.order_date.split('T')[0] : '',
+            expected_delivery: po.expected_delivery ? po.expected_delivery.split('T')[0] : '',
+            project_id: po.project_id ? String(po.project_id) : '',
+            site_id: po.site_id ? String(po.site_id) : '',
+            delivery_address: po.delivery_address || '',
+            notes: po.notes || '',
+            items: (po.items || []).map((i: any) => ({
+              material_id: String(i.material_id),
+              material_name: i.material_name,
+              unit: i.unit,
+              quantity: String(i.quantity),
+              unit_price: String(i.unit_price),
+              tax_percentage: i.tax_percentage || 0
+            }))
+          });
+        }
+      }).catch(console.error);
+    }
+  }, [id, isEdit]);
+
   const watchItems = form.watch("items");
   const watchItemsArray = Array.isArray(watchItems) ? watchItems : [];
   const subtotal = watchItemsArray.reduce((acc, item) => acc + (parseFloat(item?.quantity || '0') * parseFloat(item?.unit_price || '0')), 0);
@@ -107,13 +137,15 @@ export default function CreatePO() {
           tax_percentage: i.tax_percentage || 0,
         }))
       };
-      const { data } = await purchaseService.create(payload);
+      const { data } = isEdit && id
+        ? await purchaseService.update(id, payload)
+        : await purchaseService.create(payload);
       if (data.success) {
-        toast.success('Purchase order created');
+        toast.success(isEdit ? 'Purchase order updated' : 'Purchase order created');
         navigate('/purchase-orders');
       }
     } catch (e: any) {
-      toast.error(e.message || 'Error creating PO');
+      toast.error(e.message || 'Error saving PO');
     }
     setSaving(false);
   };
@@ -126,9 +158,9 @@ export default function CreatePO() {
         </Button>
         <div>
           <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <ShoppingCart size={22} className="text-primary" /> Create Purchase Order
+            <ShoppingCart size={22} className="text-primary" /> {isEdit ? 'Edit Purchase Order' : 'Create Purchase Order'}
           </h1>
-          <p className="text-sm text-muted-foreground">Fill details and add materials</p>
+          <p className="text-sm text-muted-foreground">{isEdit ? 'Modify details and order items' : 'Fill details and add materials'}</p>
         </div>
       </div>
 
@@ -299,7 +331,7 @@ export default function CreatePO() {
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => navigate('/purchase-orders')}>Cancel</Button>
             <Button type="submit" disabled={saving} className="px-8 font-medium shadow-md">
-              {saving ? 'Creating...' : 'Create Purchase Order'}
+              {saving ? (isEdit ? 'Saving...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Create Purchase Order')}
             </Button>
           </div>
         </form>

@@ -50,6 +50,7 @@ export default function App() {
         <Route path="transfers"  element={<TransferList />} />
         <Route path="purchase-orders"     element={<PurchaseOrderList />} />
         <Route path="purchase-orders/new" element={<CreatePO />} />
+        <Route path="purchase-orders/:id/edit" element={<CreatePO />} />
         <Route path="usage"    element={<UsageList />} />
         <Route path="wastage"  element={<WastageList />} />
         <Route path="projects" element={<ProjectList />} />

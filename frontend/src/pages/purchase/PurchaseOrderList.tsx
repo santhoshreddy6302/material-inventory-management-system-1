@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, ShoppingCart, Eye, Trash2, RefreshCw } from 'lucide-react';
+import { Plus, ShoppingCart, Eye, Trash2, RefreshCw, Edit2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { purchaseService } from '../../services/purchaseService';
@@ -256,6 +256,13 @@ export default function PurchaseOrderList() {
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openView(row.id)} title="View">
                           <Eye size={14} />
                         </Button>
+                        {['draft', 'rejected'].includes(row.status) && hasRole('admin', 'procurement_staff', 'project_manager') && (
+                          <Link to={`/purchase-orders/${row.id}/edit`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-600" title="Edit">
+                              <Edit2 size={14} />
+                            </Button>
+                          </Link>
+                        )}
                         {getStatusActions(row).map(s => (
                           <Button key={s} variant="ghost" size="sm" onClick={() => openStatus(row, s)} className={`h-7 px-2 text-xs ${statusBtnClass(s)}`}>
                             {statusLabels[s]}

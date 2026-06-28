@@ -300,12 +300,68 @@ export const remove = async (req: Request, res: Response) => {
     const po = await prisma.purchaseOrder.findUnique({ where: { id } });
     if (!po) return error(res, 'Purchase order not found', 404);
     
-    if (!['draft', 'cancelled'].includes(po.status)) {
-      return error(res, 'Only draft or cancelled orders can be deleted', 400);
+    if (!['draft', 'cancelled', 'rejected'].includes(po.status)) {
+      return error(res, 'Only draft, cancelled, or rejected orders can be deleted', 400);
     }
     
     await prisma.purchaseOrder.delete({ where: { id } });
     return success(res, null, 'Purchase order deleted successfully');
+  } catch (err: any) {
+    return error(res, err.message, 500);
+  }
+};
+
+export const update = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { supplier_id, project_id, site_id, order_date, expected_delivery, notes, items, delivery_address, terms_conditions } = req.body;
+
+    const po = await prisma.purchaseOrder.findUnique({
+      where: { id },
+      include: { items: true }
+    });
+
+    if (!po) return error(res, 'Purchase order not found', 404);
+    if (!['draft', 'rejected'].includes(po.status)) {
+      return error(res, 'Only draft or rejected purchase orders can be edited', 400);
+    }
+
+    if (!items || !items.length) return error(res, 'At least one item is required', 400);
+
+    let subtotal = 0;
+    items.forEach((item: any) => { subtotal += parseFloat(item.quantity) * parseFloat(item.unit_price); });
+
+    const updatedPo = await prisma.$transaction(async (tx) => {
+      // Delete old items
+      await tx.purchaseOrderItem.deleteMany({ where: { poId: id } });
+
+      // Update PO
+      return await tx.purchaseOrder.update({
+        where: { id },
+        data: {
+          supplierId: parseInt(supplier_id, 10),
+          projectId: project_id ? parseInt(project_id, 10) : null,
+          siteId: site_id ? parseInt(site_id, 10) : null,
+          orderDate: new Date(order_date),
+          expectedDelivery: expected_delivery ? new Date(expected_delivery) : null,
+          subtotal: subtotal,
+          totalAmount: subtotal,
+          notes: notes || null,
+          deliveryAddress: delivery_address || null,
+          termsConditions: terms_conditions || null,
+          items: {
+            create: items.map((i: any) => ({
+              materialId: parseInt(i.material_id, 10),
+              quantity: parseFloat(i.quantity),
+              unitPrice: parseFloat(i.unit_price),
+              totalPrice: parseFloat(i.quantity) * parseFloat(i.unit_price)
+            }))
+          }
+        }
+      });
+    });
+
+    return success(res, updatedPo, 'Purchase order updated successfully');
   } catch (err: any) {
     return error(res, err.message, 500);
   }
