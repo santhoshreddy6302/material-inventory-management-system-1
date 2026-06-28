@@ -368,3 +368,29 @@ export const update = async (req: Request, res: Response) => {
     return error(res, err.message, 500);
   }
 };
+
+export const updatePaymentStatus = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { payment_status, notes } = req.body;
+
+    const po = await prisma.purchaseOrder.findUnique({ where: { id } });
+    if (!po) return error(res, 'Purchase order not found', 404);
+
+    if (!['unpaid', 'partial', 'paid'].includes(payment_status)) {
+      return error(res, 'Invalid payment status', 400);
+    }
+
+    const updated = await prisma.purchaseOrder.update({
+      where: { id },
+      data: {
+        paymentStatus: payment_status,
+        notes: notes ? `${po.notes || ''}\n[Payment Update]: ${notes}`.trim() : po.notes
+      }
+    });
+
+    return success(res, updated, 'Payment status updated successfully');
+  } catch (err: any) {
+    return error(res, err.message, 500);
+  }
+};

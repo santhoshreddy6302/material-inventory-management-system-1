@@ -19,6 +19,13 @@ import {
   DialogFooter,
 } from '../../components/ui/dialog';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -137,6 +144,34 @@ export default function PurchaseOrderList() {
     } catch (e: any) {
       toast.error(e.message || 'Error deleting PO');
     }
+  };
+
+  const [paymentModal, setPaymentModal] = useState(false);
+  const [newPaymentStatus, setNewPaymentStatus] = useState('');
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [updatingPayment, setUpdatingPayment] = useState(false);
+
+  const openPaymentModal = (po: PurchaseOrder) => {
+    setSelected(po);
+    setNewPaymentStatus(po.payment_status || 'unpaid');
+    setPaymentNotes('');
+    setPaymentModal(true);
+  };
+
+  const handlePaymentUpdate = async () => {
+    if (!selected) return;
+    setUpdatingPayment(true);
+    try {
+      const { data: r } = await purchaseService.updatePaymentStatus(selected.id, { payment_status: newPaymentStatus, notes: paymentNotes });
+      if (r.success) {
+        toast.success('Payment status updated');
+        setPaymentModal(false);
+        fetchData();
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Error updating payment status');
+    }
+    setUpdatingPayment(false);
   };
 
   const getStatusActions = (row: PurchaseOrder): string[] => {
@@ -268,6 +303,11 @@ export default function PurchaseOrderList() {
                             {statusLabels[s]}
                           </Button>
                         ))}
+                        {hasRole('admin', 'accounts_staff', 'procurement_staff') && (
+                          <Button variant="ghost" size="sm" onClick={() => openPaymentModal(row)} className="h-7 px-2 text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400">
+                            Pay Status
+                          </Button>
+                        )}
                         {['draft', 'cancelled', 'rejected', 'received', 'delivered'].includes(row.status) && hasRole('admin', 'procurement_staff') && (
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(row.id, row.po_number)}>
                             <Trash2 size={14} />
@@ -365,6 +405,40 @@ export default function PurchaseOrderList() {
             <Button variant="outline" onClick={() => setStatusModal(false)}>Cancel</Button>
             <Button onClick={handleStatusUpdate} disabled={saving}>
               {saving ? 'Updating...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Status Modal */}
+      <Dialog open={paymentModal} onOpenChange={setPaymentModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Payment Status → {selected?.po_number}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Payment Status</label>
+              <Select value={newPaymentStatus} onValueChange={setNewPaymentStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="partial">Partial</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Notes (optional)</label>
+              <Textarea rows={3} value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} placeholder="Add transaction reference or notes..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaymentModal(false)}>Cancel</Button>
+            <Button onClick={handlePaymentUpdate} disabled={updatingPayment}>
+              {updatingPayment ? 'Updating...' : 'Confirm'}
             </Button>
           </DialogFooter>
         </DialogContent>

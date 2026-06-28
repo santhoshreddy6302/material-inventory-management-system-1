@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { getAll, getOne, create, updateStatus, remove, update } from '../controllers/purchaseController';
+import { getAll, getOne, create, updateStatus, remove, update, updatePaymentStatus } from '../controllers/purchaseController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 
@@ -21,6 +21,7 @@ router.put('/:id', authorize('admin', 'project_manager', 'procurement_staff'), [
 ], validate, update);
 router.patch('/:id/status', authorize('admin', 'project_manager', 'procurement_staff'), updateStatus);
 router.put('/:id/status', authorize('admin', 'project_manager', 'procurement_staff'), updateStatus);
+router.put('/:id/payment', authorize('admin', 'accounts_staff', 'procurement_staff'), updatePaymentStatus);
 router.delete('/:id', authorize('admin', 'procurement_staff'), remove);
 
 export default router;
