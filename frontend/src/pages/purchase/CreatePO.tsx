@@ -88,8 +88,9 @@ export default function CreatePO() {
     materialService.getAll({ limit: 100, is_active: 'true' }).then((r: any) => { if (r.data?.success) setMaterials(r.data.data || []); }).catch(() => setMaterials([]));
   }, []);
 
-  const watchItems = form.watch("items") || [];
-  const subtotal = (watchItems || []).reduce((acc, item) => acc + (parseFloat(item?.quantity || '0') * parseFloat(item?.unit_price || '0')), 0);
+  const watchItems = form.watch("items");
+  const watchItemsArray = Array.isArray(watchItems) ? watchItems : [];
+  const subtotal = watchItemsArray.reduce((acc, item) => acc + (parseFloat(item?.quantity || '0') * parseFloat(item?.unit_price || '0')), 0);
 
   const onSubmit = async (values: POFormValues) => {
     setSaving(true);
@@ -267,7 +268,7 @@ export default function CreatePO() {
                   <div className="col-span-4 sm:col-span-1">
                     <FormLabel className="text-xs block mb-2">Total</FormLabel>
                     <div className="text-sm font-semibold text-foreground py-2 h-10 flex items-center">
-                      {fmtCurrency(parseFloat(watchItems[idx]?.quantity || '0') * parseFloat(watchItems[idx]?.unit_price || '0'))}
+                      {fmtCurrency(parseFloat(watchItemsArray[idx]?.quantity || '0') * parseFloat(watchItemsArray[idx]?.unit_price || '0'))}
                     </div>
                   </div>
                   <div className="col-span-12 sm:col-span-1 flex justify-end pb-1">

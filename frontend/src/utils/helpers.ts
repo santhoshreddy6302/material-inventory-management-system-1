@@ -21,12 +21,16 @@ export const timeAgo = (d: string | Date | null | undefined): string => {
 
 export const fmtCurrency = (n: number | string | null | undefined, symbol: string = '₹'): string => {
   if (n === null || n === undefined) return '—';
-  return `${symbol}${parseFloat(String(n)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const val = parseFloat(String(n));
+  if (isNaN(val)) return '—';
+  return `${symbol}${val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 export const fmtNumber = (n: number | string | null | undefined): string => {
   if (n === null || n === undefined) return '—';
-  return parseFloat(String(n)).toLocaleString('en-IN', { maximumFractionDigits: 3 });
+  const val = parseFloat(String(n));
+  if (isNaN(val)) return '—';
+  return val.toLocaleString('en-IN', { maximumFractionDigits: 3 });
 };
 
 export const fmtLargeNumber = (n: number | string | null | undefined): string => {
