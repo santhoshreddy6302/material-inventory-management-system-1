@@ -181,6 +181,7 @@ async function main() {
             poNumber: po.poNumber,
             supplierId: suppliers[0].id,
             siteId: sites[0].id,
+            projectId: sites[0].projectId || null,
             orderDate: new Date(),
             subtotal: po.total,
             taxAmount: 0,
