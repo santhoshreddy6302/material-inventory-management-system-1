@@ -291,7 +291,7 @@ export default function PurchaseOrderList() {
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openView(row.id)} title="View">
                           <Eye size={14} />
                         </Button>
-                        {['draft', 'rejected'].includes(row.status) && hasRole('admin', 'procurement_staff', 'project_manager') && (
+                        {hasRole('admin', 'procurement_staff', 'project_manager') && (
                           <Link to={`/purchase-orders/${row.id}/edit`}>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-600" title="Edit">
                               <Edit2 size={14} />

@@ -324,9 +324,6 @@ export const update = async (req: Request, res: Response) => {
     });
 
     if (!po) return error(res, 'Purchase order not found', 404);
-    if (!['draft', 'rejected'].includes(po.status)) {
-      return error(res, 'Only draft or rejected purchase orders can be edited', 400);
-    }
 
     if (!items || !items.length) return error(res, 'At least one item is required', 400);
 
