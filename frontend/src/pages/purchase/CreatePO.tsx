@@ -144,7 +144,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {(suppliers || []).map(s => s && s.id && <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                      {(suppliers || []).filter(s => s && s.id).map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -170,7 +170,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {(projects || []).map(p => p && p.id && <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>)}
+                      {(projects || []).filter(p => p && p.id).map(p => <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -182,7 +182,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select site" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {(sites || []).map(s => s && s.id && <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                      {(sites || []).filter(s => s && s.id).map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -232,7 +232,7 @@ export default function CreatePO() {
                         }} value={field.value || ''}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Select material" /></SelectTrigger></FormControl>
                           <SelectContent>
-                            {(materials || []).map(m => m && m.id && <SelectItem key={m.id} value={m.id.toString()}>{m.name} ({m.unit})</SelectItem>)}
+                            {(materials || []).filter(m => m && m.id).map(m => <SelectItem key={m.id} value={m.id.toString()}>{m.name} ({m.unit})</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
