@@ -202,7 +202,9 @@ export const updateStatus = async (req: Request, res: Response) => {
       approved: ['ordered', 'cancelled'],
       ordered: ['partially_received', 'received', 'cancelled'],
       partially_received: ['received', 'cancelled'],
-      received: [],
+      received: ['cancelled'],
+      delivered: ['cancelled'],
+      rejected: ['draft', 'cancelled'],
       cancelled: []
     };
     
