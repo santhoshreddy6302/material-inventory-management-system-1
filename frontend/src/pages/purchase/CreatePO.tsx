@@ -266,7 +266,7 @@ export default function CreatePO() {
                     )} />
                   </div>
                   <div className="col-span-4 sm:col-span-1">
-                    <FormLabel className="text-xs block mb-2">Total</FormLabel>
+                    <label className="text-xs font-medium text-foreground block mb-2">Total</label>
                     <div className="text-sm font-semibold text-foreground py-2 h-10 flex items-center">
                       {fmtCurrency(parseFloat(watchItemsArray[idx]?.quantity || '0') * parseFloat(watchItemsArray[idx]?.unit_price || '0'))}
                     </div>
