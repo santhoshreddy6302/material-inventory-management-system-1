@@ -48,6 +48,11 @@ export const getAll = async (req: Request, res: Response) => {
       const { _count, ...poData } = po;
       return {
         ...poData,
+        po_number: po.poNumber,
+        order_date: po.orderDate,
+        expected_delivery: po.expectedDelivery,
+        total_amount: po.totalAmount,
+        payment_status: po.paymentStatus,
         supplier_name: po.supplier?.name,
         supplier_phone: po.supplier?.phone,
         project_name: po.project?.name,
@@ -89,11 +94,18 @@ export const getOne = async (req: Request, res: Response) => {
       ...i,
       material_name: i.material?.name,
       unit: i.material?.unit,
-      material_code: i.material?.materialCode
+      material_code: i.material?.materialCode,
+      unit_price: i.unitPrice,
+      total_price: i.totalPrice
     }));
 
     const formatted = {
       ...po,
+      po_number: po.poNumber,
+      order_date: po.orderDate,
+      expected_delivery: po.expectedDelivery,
+      total_amount: po.totalAmount,
+      payment_status: po.paymentStatus,
       supplier_name: po.supplier?.name,
       supplier_email: po.supplier?.email,
       supplier_phone: po.supplier?.phone,
