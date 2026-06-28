@@ -146,11 +146,15 @@ export default function PurchaseOrderList() {
       approved: ['ordered', 'cancelled'],
       ordered: ['received', 'cancelled'],
       partially_received: ['received'],
+      rejected: ['draft', 'cancelled'],
+      received: ['cancelled'],
+      delivered: ['cancelled']
     };
     return map[row.status] || [];
   };
 
   const statusLabels: Record<string, string> = {
+    draft: 'Reset to Draft',
     pending_approval: 'Submit for Approval',
     approved: 'Approve',
     ordered: 'Mark Ordered',
@@ -257,7 +261,7 @@ export default function PurchaseOrderList() {
                             {statusLabels[s]}
                           </Button>
                         ))}
-                        {['draft', 'cancelled'].includes(row.status) && hasRole('admin', 'procurement_staff') && (
+                        {['draft', 'cancelled', 'rejected', 'received', 'delivered'].includes(row.status) && hasRole('admin', 'procurement_staff') && (
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(row.id, row.po_number)}>
                             <Trash2 size={14} />
                           </Button>
