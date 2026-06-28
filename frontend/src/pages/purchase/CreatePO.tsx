@@ -89,7 +89,7 @@ export default function CreatePO() {
   }, []);
 
   const watchItems = form.watch("items") || [];
-  const subtotal = watchItems.reduce((acc, item) => acc + (parseFloat(item?.quantity || '0') * parseFloat(item?.unit_price || '0')), 0);
+  const subtotal = (watchItems || []).reduce((acc, item) => acc + (parseFloat(item?.quantity || '0') * parseFloat(item?.unit_price || '0')), 0);
 
   const onSubmit = async (values: POFormValues) => {
     setSaving(true);
@@ -140,10 +140,10 @@ export default function CreatePO() {
               <FormField control={form.control} name="supplier_id" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Supplier <span className="text-destructive">*</span></FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {(suppliers || []).map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                      {(suppliers || []).map(s => s && s.id && <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -169,7 +169,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {(projects || []).map(p => <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>)}
+                      {(projects || []).map(p => p && p.id && <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -181,7 +181,7 @@ export default function CreatePO() {
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select site" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {(sites || []).map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                      {(sites || []).map(s => s && s.id && <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -222,16 +222,16 @@ export default function CreatePO() {
                         <FormLabel className="text-xs">Material <span className="text-destructive">*</span></FormLabel>
                         <Select onValueChange={(val) => {
                           field.onChange(val);
-                          const mat = materials.find(m => m.id.toString() === val);
+                          const mat = (materials || []).find(m => m && m.id && m.id.toString() === val);
                           if (mat) {
                             form.setValue(`items.${idx}.material_name`, mat.name);
                             form.setValue(`items.${idx}.unit`, mat.unit);
                             form.setValue(`items.${idx}.unit_price`, mat.cost_per_unit?.toString() || '0');
                           }
-                        }} value={field.value}>
+                        }} value={field.value || ''}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Select material" /></SelectTrigger></FormControl>
                           <SelectContent>
-                            {(materials || []).map(m => <SelectItem key={m.id} value={m.id.toString()}>{m.name} ({m.unit})</SelectItem>)}
+                            {(materials || []).map(m => m && m.id && <SelectItem key={m.id} value={m.id.toString()}>{m.name} ({m.unit})</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <FormMessage />
