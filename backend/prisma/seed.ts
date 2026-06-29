@@ -614,11 +614,14 @@ async function main() {
   console.log('📈 Additional site progress reports seeded');
 
   // Seed extra Alerts
+  const alertPo1 = await prisma.purchaseOrder.findFirst({ where: { poNumber: 'PO-2026-001' } });
+  const alertPo3 = await prisma.purchaseOrder.findFirst({ where: { poNumber: 'PO-2026-003' } });
+
   const alerts = [
     { type: 'low_stock', title: 'Low Stock Alert: TMT Steel Bars Fe500', message: 'TMT Steel Bars Fe500 at City Mall Main Site is below the minimum threshold of 10 Metric Tons.', severity: 'high', siteId: sitesList[2].id, materialId: materialsList[1].id },
-    { type: 'po_approval', title: 'PO Approval Pending: PO-2026-003', message: 'PO-2026-003 for Cement Traders Co requires immediate approval from Raj Kumar (Project Manager).', severity: 'medium' },
-    { type: 'delivery_due', title: 'Delivery Due Alert: PO-2026-001', message: 'Delivery for PO-2026-001 from BuildMat Supplies Pvt Ltd is overdue by 3 days.', severity: 'high' },
-    { type: 'budget_exceeded', title: 'Budget Exceeded Alert: Greenfield Residential Complex', message: 'Expenses for Greenfield Residential Complex have reached 95% of the total allocated budget.', severity: 'critical' }
+    { type: 'po_approval', title: 'PO Approval Pending: PO-2026-003', message: 'PO-2026-003 for Cement Traders Co requires immediate approval from Raj Kumar (Project Manager).', severity: 'medium', poId: alertPo3?.id || null },
+    { type: 'delivery_due', title: 'Delivery Due Alert: PO-2026-001', message: 'Delivery for PO-2026-001 from BuildMat Supplies Pvt Ltd is overdue by 3 days.', severity: 'high', poId: alertPo1?.id || null },
+    { type: 'budget_exceeded', title: 'Budget Exceeded Alert: Greenfield Residential Complex', message: 'Expenses for Greenfield Residential Complex have reached 95% of the total allocated budget.', severity: 'critical', siteId: sitesList[0].id }
   ];
   for (const a of alerts) {
     await prisma.alert.create({ data: a });

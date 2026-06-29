@@ -296,6 +296,10 @@ export default function AlertsPage() {
                           <div className="text-sm font-medium">{row.material_name}</div>
                           <div className="text-xs text-muted-foreground">{row.site_name}</div>
                         </div>
+                      ) : row.site_name ? (
+                        <div>
+                          <div className="text-sm font-medium">{row.site_name}</div>
+                        </div>
                       ) : (
                         row.po_number ? <span className="text-sm font-medium text-primary">PO: {row.po_number}</span> : <span className="text-muted-foreground">—</span>
                       )}
