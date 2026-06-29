@@ -49,7 +49,8 @@ export const login = async (req: Request, res: Response) => {
       { id: user.id },
       JWT_REFRESH_SECRET,
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' } as jwt.SignOptions
-    );const { password: _, ...userData } = user;
+    );
+    const { password: _, ...userData } = user;
     
     return success(res, {
       token: accessToken,
@@ -57,7 +58,8 @@ export const login = async (req: Request, res: Response) => {
       user: userData
     }, 'Login successful');
   } catch (err: any) {
-    return error(res, err.message, 500);
+    const debugInfo = `JWT_SECRET: ${typeof JWT_SECRET} (len: ${JWT_SECRET?.length}), JWT_REFRESH_SECRET: ${typeof JWT_REFRESH_SECRET} (len: ${JWT_REFRESH_SECRET?.length})`;
+    return error(res, `${err.message} (${debugInfo})`, 500);
   }
 };
 
